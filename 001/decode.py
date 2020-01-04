@@ -30,4 +30,5 @@ def longest_unique_char_str(line):
 with open('b64msg.txt', 'r') as f:
     line = f.readline()
     print(longest_unique_char_str(line))
-    
+    # Curtisisland
+

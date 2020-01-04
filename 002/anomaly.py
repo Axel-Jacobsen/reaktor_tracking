@@ -21,6 +21,12 @@ def get_variance(dat: list):
     avg = get_average(dat)
     return np.sqrt(sum([(x['val'] - avg) ** 2  for x in dat]) / (len(dat) - 1))
 
+def hex_to_ascii(v_id):
+    id_str = ''
+    for i in range(0, 14, 2):
+        id_str = id_str + chr(int(v_id[i - 14] + v_id[i - 14 + 1], 16))
+
+    return id_str
 
 if __name__ == '__main__':
     with open('ppb.bin.log', 'r') as f:
@@ -43,14 +49,6 @@ if __name__ == '__main__':
         print(f'variance: {variance}')
         print(f'avg: {totals_avg}')
         print(f'id: {sample["id"]}')
-        print()
+        print(f'location: {hex_to_ascii(sample["id"])}')
 
-        id_str = ''
-        v_id = sample['id']
-        print(v_id)
-        for i in range(0, 14, 2):
-            print(v_id[i - 14] + v_id[i - 14 + 1], '->', chr(int(v_id[i - 14] + v_id[i - 14 + 1], 16)))
-            id_str = id_str + chr(int(v_id[i - 14] + v_id[i - 14 + 1], 16))
-
-        print(id_str)
 

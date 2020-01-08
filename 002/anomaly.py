@@ -42,7 +42,11 @@ if __name__ == '__main__':
 
         variance = get_variance(totals)
         totals_avg = get_average(totals)
-        samples_outside_variance = list(filter(lambda x: not ((totals_avg - variance) < x['val'] < (totals_avg + variance)), totals))
+        samples_outside_variance = list(
+                filter(
+                    lambda x: not ((totals_avg - variance) < x['val'] < (totals_avg + variance)),
+                    totals)
+                )
         assert len(samples_outside_variance) == 1
         sample = samples_outside_variance[0]
 

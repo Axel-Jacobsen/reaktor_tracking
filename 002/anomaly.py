@@ -23,8 +23,8 @@ def get_variance(dat: list):
 
 def hex_to_ascii(v_id):
     id_str = ''
-    for i in range(0, 14, 2):
-        id_str = id_str + chr(int(v_id[i - 14] + v_id[i - 14 + 1], 16))
+    for i in range(0, len(v_id), 2):
+        id_str = id_str + chr(int(v_id[i - len(v_id)] + v_id[i - len(v_id) + 1], 16))
 
     return id_str
 

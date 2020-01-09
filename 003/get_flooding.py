@@ -3,6 +3,7 @@
 import json
 import itertools
 import numpy as np
+from datetime import datetime
 
 
 def runoff_height(height_arr:np.array):
@@ -35,6 +36,7 @@ def runoff_height(height_arr:np.array):
 
     return runoff_array
 
+
 def split_arr_on_val(arr:list, val):
     groups = []
     curr_group = []
@@ -47,6 +49,7 @@ def split_arr_on_val(arr:list, val):
                 curr_group = []
     return groups
 
+
 def get_volume(arr:list):
     nparr = np.asarray(arr)
     runoff_arr = runoff_height(nparr)
@@ -57,14 +60,7 @@ def get_volume(arr:list):
     return max([sum(v) for v in holes])
 
 
-if __name__ == '__main__':
-    with open('flood.txt', 'r') as f:
-        # regionID: str
-        # readings: array of altitudes
-        # date: str
-        json_dat = json.loads(f.read())['regions']
-        v = json_dat[0]['readings'][0]['reading']
-
+def test_pooling():
     vol_1 = {
             'val': 1,
             'arrs': [
@@ -74,15 +70,52 @@ if __name__ == '__main__':
                 [-1, -2, -1],
                 ]
             }
+    vol_4 = {
+            'val': 4,
+            'arrs': [
+                [3, -1, 3, 1, 3, 3, 1],
+                [3, 2, 3, 0, 2, 3, 1],
+                [0, 1, 2, -2, 2, 1, 0],
+                ]
+            }
+    test_pkts = [vol_1, vol_4]
+    for pkt in test_pkts:
+        for test_arr in pkt['arrs']:
+            assert pkt['val'] == get_volume(test_arr)
 
-    # get_volume(json_dat[0]['readings'][0]['reading'])
-    no_pooling = [18, 18, 18, 18, 18, 18, 18, 15, 12, 11, 9, 7] # 0
-    pooling = [7, 7, 6, 5, 4, 4, 9, 8, 6, 7, 7, 7] # 9
-    print(get_volume(no_pooling))
-    print(get_volume(pooling))
-    
-    for test_arr in vol_1['arrs']:
-        print(test_arr, '--->', end=' ')
-        print(get_volume(test_arr))
-        assert vol_1['val'] == get_volume(test_arr)
+
+if __name__ == '__main__':
+
+    test_pooling()
+
+    with open('flood.txt', 'r') as f:
+        # regionID: str
+        # readings: array of altitudes
+        # date: str
+        json_dat = json.loads(f.read())['regions']
+
+        condensed = {}
+        for region in json_dat:
+            condensed[region['regionID']] = sorted(
+                    [
+                        {
+                            'readingID': reading['readingID'],
+                            'vol': get_volume(reading['reading']),
+                            'date': datetime.strptime(reading['date'], '%d-%b-%Y')
+                        }
+                    for reading in region['readings']
+                    ],
+                key=lambda v: v['date']
+            )
+
+        for regionID in condensed.keys():
+            prev_vol = condensed[regionID][0]['vol']
+            prev_day = condensed[regionID][0]['date']
+            for reading in condensed[regionID]:
+                if abs(prev_vol - reading['vol']) > 1000 and (reading['date'] - prev_day).days == 1:
+                    print(regionID, reading['readingID'], abs(prev_vol - reading['vol']), prev_day, reading['date'])
+                prev_vol = reading['vol']
+                prev_day = reading['date']
+
+
 
